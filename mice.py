@@ -44,7 +44,7 @@ import tempfile
 try:
     from mice_config import host, port, prxstr, slicefile, secret
 except ImportError:
-    print "Using default settings."
+    print("Using default settings.")
 
     # Default settings
     host = "127.0.0.1"
@@ -53,7 +53,7 @@ except ImportError:
     slicefile = "Murmur.ice"
     secret = ''
 
-print "Import ice...",
+print("Import ice...", end=' ')
 import Ice
 import IcePy
 
@@ -65,7 +65,7 @@ idata.properties = props
 
 ice = Ice.initialize(idata)
 prx = ice.stringToProxy(prxstr)
-print "Done"
+print("Done")
 
 slicedir = Ice.getSliceDir()
 if not slicedir:
@@ -76,12 +76,12 @@ else:
     slicedir = ['-I' + slicedir]
 
 try:
-    print "Trying to retrieve slice dynamically from server...",
+    print("Trying to retrieve slice dynamically from server...", end=' ')
     # Check IcePy version as this internal function changes between version.
     # In case it breaks with future versions use slice2py and search for
     # "IcePy.Operation('getSlice'," for updates in the generated bindings.
     op = None
-    if IcePy.intVersion() < 30500L:
+    if IcePy.intVersion() < 30500:
         # Old 3.4 signature with 9 parameters
         op = IcePy.Operation('getSlice', Ice.OperationMode.Idempotent, Ice.OperationMode.Idempotent, True, (), (), (), IcePy._t_string, ())
 
@@ -97,44 +97,44 @@ try:
     Ice.loadSlice('', slicedir + [dynslicefilepath])
     dynslicefile.close()
     os.remove(dynslicefilepath)
-    print "Success"
-except Exception, e:
-    print "Failed"
-    print str(e)
+    print("Success")
+except Exception as e:
+    print("Failed")
+    print(str(e))
     while not os.path.exists(slicefile):
-         slicefile = raw_input("Path to slicefile: ")
-    print "Load slice (%s)..." % slicefile,
+         slicefile = input("Path to slicefile: ")
+    print("Load slice (%s)..." % slicefile, end=' ')
     Ice.loadSlice('', slicedir + [slicefile])
-    print "Done"
+    print("Done")
 
-print "Import dynamically compiled murmur class...",
+print("Import dynamically compiled murmur class...", end=' ')
 import Murmur
-print "Done"
-print "Establish ice connection...",
+print("Done")
+print("Establish ice connection...", end=' ')
 
 if secret:
-    print "[protected]...",
+    print("[protected]...", end=' ')
     ice.getImplicitContext().put("secret", secret)
 
 murmur = Murmur.MetaPrx.checkedCast(prx)
 m = murmur
-print "Done"
+print("Done")
 
 if __name__ != "__main__":
     prefix = __name__ + "."
 else:
     prefix = ""
     
-print "Murmur object accessible via '%smurmur' or '%sm'" % (prefix,
-                                                              prefix)
+print("Murmur object accessible via '%smurmur' or '%sm'" % (prefix,
+                                                              prefix))
 
 try:
     sl = m.getBootedServers()
 except Murmur.InvalidSecretException:
-    print "Error: Invalid ice secret. Mice won't work."
+    print("Error: Invalid ice secret. Mice won't work.")
 else:
     s = sl[0] if sl else None
-    print "%d booted servers in '%ssl', '%ss' contains '%s'" % (len(sl), prefix, prefix, repr(s))
-    print "--- Reached interactive mode ---"
+    print("%d booted servers in '%ssl', '%ss' contains '%s'" % (len(sl), prefix, prefix, repr(s)))
+    print("--- Reached interactive mode ---")
 
 
